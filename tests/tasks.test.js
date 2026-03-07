@@ -1,9 +1,6 @@
 import request from "supertest";
 import app from "../src/app.js";
-import Task from "../src/models/Task.js";
-beforeAll(async () => {
-  await Task.deleteMany({});
-});
+
 let token;
 let taskId;
 

@@ -1,34 +1,34 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+
+// 1. Extract token from Authorization header
+// 2. Verify token
+// 3. Find user
+// 4. Attach user to req.user
+// 5. Call next()
+// 6. If invalid → return 401
+
 const authMiddleware = async (req, res, next) => {
+  const authHeader = req.headers.authorization || "";
+  if (!authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
   try {
-    const authHeader = req.headers.authorization;
-
-    // check if header exists
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "No token provided" });
-    }
-
-    // extract token
-    const token = authHeader.split(" ")[1];
-
-    // verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // find user
-    const user = await User.findById(decoded.id);
-
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "testsecret");
+    // Francesca: enforce that the requester is a valid user before hitting protected routes
+    const user = await User.findOne({ _id: decoded.id });
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({ message: "Invalid token" });
     }
 
-    // attach user
     req.user = user;
-
     next();
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+  } catch (err) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
 };
 

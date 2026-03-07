@@ -1,11 +1,5 @@
 import request from "supertest";
 import app from "../src/app.js";
-import mongoose from "mongoose";
-import User from "../src/models/User.js";
-
-beforeAll(async () => {
-  await User.deleteMany({});
-});
 
 describe("Auth Routes", () => {
 
